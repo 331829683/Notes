@@ -1,3 +1,11 @@
+`目录 start`
+ 
+    - [IDEA 新建一个Springboot web项目并使用Gradle构建](#idea-新建一个springboot-web项目并使用gradle构建)
+            - [配置文件](#配置文件)
+                - [构建文件](#构建文件)
+
+`目录 end` *目录创建于2018-01-14*
+****************************************
 ## IDEA 新建一个Springboot web项目并使用Gradle构建
 - `Windows平台下：安装sdkman 包管理器 或者chocolatey`
 - `使用包管理器来安装 groovy Springboot`
@@ -8,7 +16,7 @@
 
 #### 配置文件
 `配置文件 application.yml`
-```
+```yml
 	spring:
   profiles:
     active: development # 选用开发模式
@@ -25,19 +33,9 @@
         max-total: 100
         min-idle: 6
         max-wait-millis: 10000
-    # 上面是配置使用了DBCP数据连接池
-    #server:
-    #  port: 8443
-    #  ssl:
-    #    key-store: classpath:key/keystore.p12
-    #    key-store-password: kuang1104
-    #    keyStoreType: PKCS12
-    #    keyAlias: tomcat
-
     logging:
       level:
         root: info
-
     # 开发模式相关的配置
     ---
 
@@ -55,7 +53,6 @@
 
     # 发行时采用的配置信息
     ---
-
     spring:
       profiles: production
 
@@ -70,8 +67,8 @@
 ```
 
 - 也可以将上面的开发部分，上线部分的配置创建两个配置文件 `application-dev.properties` 和 `application-prod.properties`
-- 在主配置文件中指明
-```
+- 在主配置文件`application.yml`中指明
+```yml
     spring:
       profiles:
         active: dev或者是prod
@@ -96,18 +93,12 @@
           base-path: /rest
     server:
       context-path: /myth
-    #  ssl:
-    #    key-store: classpath:static/keystore.p12
-    #    key-store-password: demo1429336
-    #    key-store-type: PKCS12
-    #    key-alias: tomcat 
 ```
 `application-dev.properties` 文件
-```
+```conf
     # Servlet contain
     server.port=8888
     server.session.timeout=300
-
 
     # Log Config
     logging.file=log/myth.log
@@ -144,8 +135,7 @@
 ##### 构建文件
 
 `build.gradle`
-
-```
+```groovy
 	buildscript {
 	ext {
 		springBootVersion = '1.5.1.RELEASE'
@@ -187,7 +177,7 @@
 	    testCompile('org.springframework.boot:spring-boot-starter-test')
     }
     sourceSets.main.java.srcDirs=['src/main/java','src/main/groovy']
-    配置main
+    //配置main
     jar{
 	    manifest{
 		    attributes 'Main-Class' : 'com.myth.MythApplication'
@@ -202,15 +192,13 @@
 
 
 `如果要放在tomcat等web容器中运行，就要和Application同级目录下新建该类`
-```
-    public class ServletInitializer extends SpringBootServletInitializer {
-
-        @Override
-        protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-            return application.sources(DemoApplication.class);
-        }
-
-    }
+```java
+  public class ServletInitializer extends SpringBootServletInitializer {
+      @Override
+      protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+          return application.sources(DemoApplication.class);
+      }
+  }
 ```
 
 

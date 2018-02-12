@@ -1,34 +1,96 @@
-# Myth 关于 Java EE的认识
-## 1.【JSP/Servlet 】
-- 1、JSP页面上的SQL标签以及EL标签是优先于文件头的那些JavaServlet语句运行的，所以要保证非法进入页面时重定向的问题
-- 2、如果想要获取异常来据此返回参数到页面弹窗提示，那么就要对一层层的方法调用，进行查找，所有的try catch 块 都要检查
-    - 因为一般我的习惯就是把异常当场就处理了，而要实现这个要求就必须将异常层层上抛！！！！
-* 3、中文乱码问题：
-    - **接收**
-        - 使用get方法，需要转换成gbk :`newString(s.getBytes("ISO-88511-1","gbk");`
-        - post方法需要转换成UTF-8
-    - **回应** 均使用UTF-8
-
-*  4、查询数据： 使用set集合，查询对象是否存在，使用contians
-*  5、Servlet 是单例多线程的
-*  6、**eclipse中将java项目转成web项目**
-    *  经常在eclipse中导入web项目时，出现转不了项目类型的问题，导入后就是一个java项目，有过很多次经历，今天也有同事遇到类似问题，就把这个解决方法记下来吧，免得以后再到处去搜索。 
-    **解决步骤**： 
-  
--  1、进入项目目录，可看到.project文件，打开。 
--  2、找到`<natures>...</natures>`代码段。 
--  3、在第2步的代码段中加入如下标签内容并保存： 
+`目录 start`
  
-``` xml
+- [JavaEE](#javaee)
+    - [1.【JSP/Servlet】](#1jspservlet)
+    - [2.【几大框架简述】](#2几大框架简述)
+    - [3.【Hibernate基础配置】](#3hibernate基础配置)
+        - [3.1【JDBC 和 Hibernate 比较】](#31jdbc-和-hibernate-比较)
+            - [3.1.1【配置流程】如果后续需要添加表的话，就这个顺序](#311配置流程如果后续需要添加表的话就这个顺序)
+        - [3.2 Hibernate必须JAR：【Hibernate 3.6】](#32-hibernate必须jarhibernate-36)
+        - [3.3 编写数据库表对应框架持久层的对象：](#33-编写数据库表对应框架持久层的对象)
+        - [3.4 编写hibernate.cfg.xml文件 一般在src目录下](#34-编写hibernatecfgxml文件-一般在src目录下)
+        - [3.5日志文件的配置：](#35日志文件的配置)
+        - [3.6 SessionFactory 和 Session 比较：](#36-sessionfactory-和-session-比较)
+        - [3.7 OID的作用：](#37-oid的作用)
+        - [3.8 【id 生成策略】：](#38-id-生成策略)
+        - [3.9 【非普通类型】](#39-非普通类型)
+    - [4.【Hibernate对象的关联配置】](#4hibernate对象的关联配置)
+        - [4.1 一对多的配置](#41-一对多的配置)
+            - [**注意 ：**](#注意-)
+        - [4.2【多对多的配置】](#42多对多的配置)
+            - [4.2.1 学生方 配置](#421-学生方-配置)
+            - [4.2.2 课程方 配置](#422-课程方-配置)
+        - [4.3 【一对一的配置】](#43-一对一的配置)
+        - [4.4【使用多对一的技巧】](#44使用多对一的技巧)
+            - [4.4.1.添加记录：](#441添加记录)
+            - [4.4.2.删除记录](#442删除记录)
+        - [4.5 【继承关系的配置】 分两种，一般使用前者：](#45-继承关系的配置-分两种一般使用前者)
+        - [4.6.【Hibernate 异常】](#46hibernate-异常)
+            - [4.6.1 could not find a getter for](#461-could-not-find-a-getter-for)
+            - [4.6.2 个人总结：](#462-个人总结)
+        - [4.7.【Hibernate对象的状态】](#47hibernate对象的状态)
+            - [4.7.1 Session的方法。](#471-session的方法)
+            - [4.7.2 特别注意：](#472-特别注意)
+    - [7 【Mybatis】](#7-mybatis)
+        - [7.1 xml文件配置：](#71-xml文件配置)
+            - [主配置文件：](#主配置文件)
+                - [操作配置文件：](#操作配置文件)
+        - [7.2 导入JAR包：](#72-导入jar包)
+        - [7.3 创建SqlSessionFactory类 内容：](#73-创建sqlsessionfactory类-内容)
+            - [maven Spring-mybaits 配置](#maven-spring-mybaits-配置)
+                - [**SessionFactory类，使用Spring注入一个工厂类，然后使用本地线程组，节省Session开销**](#sessionfactory类使用spring注入一个工厂类然后使用本地线程组节省session开销)
+        - [7.4 流程控制](#74-流程控制)
+            - [foreach 循环语句](#foreach-循环语句)
+                - [collection 有 arry list map 几种 还有item是必写，其他的是可选的](#collection-有-arry-list-map-几种-还有item是必写其他的是可选的)
+            - [if 判断语句:](#if-判断语句)
+            - [set 方便书写update语句](#set-方便书写update语句)
+            - [choose 相当于switch语句](#choose-相当于switch语句)
+                - [$和的区别：](#$和的区别)
+    - [8.【Spring】](#8spring)
+        - [8.1 基本JAR包：](#81-基本jar包)
+                - [maven配置Spring包](#maven配置spring包)
+        - [8.2 Spring技巧](#82-spring技巧)
+            - [8.2.1 获取Spring已有的Context环境](#821-获取spring已有的context环境)
+                - [【在JSP或Servlet中】](#在jsp或servlet中)
+            - [Spring 和 ServletContextList](#spring-和-servletcontextlist)
+        - [8.3 注解方式：](#83-注解方式)
+            - [8.3.1 Application.xml中配置头部分](#831-applicationxml中配置头部分)
+            - [8.3.2 常用的注解：](#832-常用的注解)
+        - [8.4 xml方式：](#84-xml方式)
+        - [8.5 IOC / DI：控制反转](#85-ioc--di控制反转)
+        - [8.6 AOP：](#86-aop)
+            - [8.6.1 基本概念](#861-基本概念)
+            - [8.6.2 基本配置](#862-基本配置)
+            - [8.6.3 JDBC](#863-jdbc)
+            - [8.6.4 注意](#864-注意)
+        - [8.7 Spring-Websocket 配置](#87-spring-websocket-配置)
+                - [maven配置jar环境](#maven配置jar环境)
+        - [8.0 xml方式和注解方式的比较：](#80-xml方式和注解方式的比较)
+            - [1 Spring AOP还是完全用AspectJ？](#1-spring-aop还是完全用aspectj？)
+            - [2 Spring AOP中使用@AspectJ还是XML？](#2-spring-aop中使用@aspectj还是xml？)
+            - [3 混合切面类型](#3-混合切面类型)
+    - [9 【SpringMVC】](#9-springmvc)
+        - [9.1 必要JAR包：](#91-必要jar包)
+        - [9.2 实现逻辑](#92-实现逻辑)
+        - [9.3 controller的配置](#93-controller的配置)
+            - [9.3.1类型转换（也可以使用Hibernate的convert）](#931类型转换（也可以使用hibernate的convert）)
+                - [SpringMVC的内置代理](#springmvc的内置代理)
+                - [Hibernate的covert包](#hibernate的covert包)
+            - [Controller层的异常处理（一般处理自定义异常）](#controller层的异常处理（一般处理自定义异常）)
+            - [拦截器机制](#拦截器机制)
+            - [视图解析](#视图解析)
+            - [上传下载](#上传下载)
+            - [JSON的解析](#json的解析)
+    - [10.【SSH框架的整合】](#10ssh框架的整合)
+    - [11.【SSM框架的整合】](#11ssm框架的整合)
+    - [12.【Redis的使用】](#12redis的使用)
+        - [12.1 【Java 使用 redis 配置】](#121-java-使用-redis-配置)
 
-    <nature>org.eclipse.wst.common.project.facet.core.nature</nature>
-    <nature>org.eclipse.wst.common.modulecore.ModuleCoreNature</nature> 
-    <nature>org.eclipse.jem.workbench.JavaEMFNature</nature> 
+`目录 end` *目录创建于2018-01-14*
+****************************************
+# JavaEE
 
-``` 
-- 4、在eclipse的项目上点右键，刷新项目。 
-- 5、在项目上点右键，进入属性（properties） 
-- 6、在左侧列表项目中点击选择“Project Facets”，在右侧选择“Dynamic Web Module”和"Java"，点击OK保存即可。
+*******************
 ## 2.【几大框架简述】
 * MVC设计模式：
     * M
@@ -134,7 +196,6 @@
         <key column="外码"></key><!-- 外码 是必须的 -->
         <element column="号码" type="string"/>
     </set>
-
 ```
 * List集合:
 
@@ -144,7 +205,6 @@
             <index></index>
             <element></element>
     </list>
-
 ```
 * 查询列 属性：
 `<property name="" formula="(select sum() from 选修表 as u where u.id=id)"></property>`
@@ -204,7 +264,6 @@
         <key column="cid"></key>
         <many-to-many class="Student" column="stu_id"></many-to-many>
     </set>
-
 ```
 #### 4.2.2 课程方 配置
 
@@ -213,7 +272,6 @@
         <key column="stu_id"></key>
         <many-to-many class="Course" column="cid"></many-to-many>
     </set>
-
 ```
 
 ***********************************
@@ -263,7 +321,7 @@
 ```
 *******************************************************
 ### 4.6.【Hibernate 异常】
-#### 4.6.1 could not find a getter for ...
+#### 4.6.1 could not find a getter for
     原因：1 可能真的没写get方法，或者get方法不合规范 setget方法中不允许两个连续大写字母
          2 *.hmb.xml文件中的属性名和pojo持久类中属性名不一致（一定不能在表名中添加下划线）
          3 方法名写错（基本不可能，都是自动生成的）
@@ -280,13 +338,14 @@
         对应的Dao（添加的时候默认是没有使用事务，所以需要手动修改）,添加，删除，都是依据主键的，
         至少要初始化主键，当然还得满足数据库的要求
 
-### 4.7.【Hibernate 对象的状态】
+### 4.7.【Hibernate对象的状态】
+> 主要是对象内存和Session中的状态区别，而不是Session和数据库
 
-1. 临时态：刚实例化对象。对象在数据库中不存在，Session中也不存在
-1. 游离态：刚实例化的对象，但是该对象手动指定了OID并且OID在数据库中已经存在，并且是没有绑定Session的（特殊的临时态）
+-  `临时态`：刚实例化对象。对象在数据库中不存在，Session中也不存在
+-  `游离态`：刚实例化的对象，但是该对象手动指定了OID并且OID在数据库中已经存在，并且是没有绑定Session的（特殊的临时态）
     * 保存两个有关联关系的对象，update时，如果配置文件中配置了级联，就会一起保存，一般建议在一方级联
-1. 持久态：该对象在数据库中存在，该对象绑定在Session（一级缓存）中
-1. 删除态：session.delete(对象)，删除后对象从数据库和Session中都移除了，但是OID还在内存中。
+-  `持久态`：该对象在数据库中存在，该对象绑定在Session（一级缓存）中
+-  `删除态`：session.delete(对象)，删除后对象从数据库和Session中都移除了，但是OID还在内存中。
     * 游离态delete后就成了删除态
     * 持久态delete后就成了删除态
 
@@ -631,7 +690,7 @@
     - 所以在启动这个初始化方法的时候，其实Spring的环境是还没有加载的，所以没有扫描，也就没有了自动注入，也就有了空指针异常
     - 所以要使用如下方法得到Spring的Context（上下文），获取bean，再操作
   
-```
+```java
     public void contextInitialized(ServletContextEvent event) { 
         ApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(event.getServletContext());
         ....
@@ -641,7 +700,7 @@
 ### 8.3 注解方式：
 
 #### 8.3.1 Application.xml中配置头部分
-```
+```xml
     头部分要添加Context
     <?xml version="1.0" encoding="UTF-8"?>
     <beans xmlns="http://www.springframework.org/schema/beans"
@@ -990,65 +1049,6 @@ jar包：
 ## 12.【Redis的使用】
 
 ### 12.1 【Java 使用 redis 配置】
-- maven依赖(Spring 4.1.7)：
-```xml
-    <dependency>
-        <groupId>org.springframework.data</groupId>
-        <artifactId>spring-data-redis</artifactId>
-        <version>1.6.0.RELEASE</version>
-    </dependency>
-
-    <dependency>
-        <groupId>redis.clients</groupId>
-        <artifactId>jedis</artifactId>
-        <version>2.9.0</version>
-        <type>jar</type>
-    <scope>compile</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-lang3</artifactId>
-        <version>3.3.2</version>
-    </dependency>
-```
-- Spring配置文件 
-```xml
-    <!--
-        加载redis配置文件 
-        如果已经加载了一个文件，那么第一个就要写这个配置项，
-        <property name="ignoreUnresolvablePlaceholders" value="true"/>
-        第二个要加 后面的配置 
-        不然就只会加载前面那个文件
-    -->
-    <context:property-placeholder location="classpath:redis.properties" ignore-unresolvable="true"/>
-    <!-- redis连接池的配置 -->
-      <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
-          <property name="maxActive" value="${redis.pool.maxActive}"/>
-          <property name="maxIdle" value="${redis.pool.maxIdle}"/>
-          <property name="minIdle" value="${redis.pool.minIdle}"/>
-          <property name="maxWait" value="${redis.pool.maxWait}"/>
-          <property name="testOnBorrow" value="${redis.pool.testOnBorrow}"/>
-          <property name="testOnReturn" value="${redis.pool.testOnReturn}"/>
-      </bean>
-      
-      <!-- redis的连接池pool，不是必选项：timeout/password  -->
-      <bean id = "jedisPool" class="redis.clients.jedis.JedisPool">
-          <constructor-arg index="0" ref="jedisPoolConfig"/>
-          <constructor-arg index="1" value="${redis.host}"/>
-          <constructor-arg index="2" value="${redis.port}" type="int"/>
-          <constructor-arg index="3" value="${redis.timeout}" type="int"/>
-          <constructor-arg index="4" value="${redis.password}"/>
-      </bean>
-```
-
-- java 实际测试
-- [JedisUtilsTest.java](https://github.com/Kuangcp/Maven_SSM/blob/master/src/test/java/redis/JedisUtilTest.java)
-
-#### redis 使用后要disconnect释放连接
-#### redis 事务 exec释放事务
-
-### jedis遇到的异常
-- Invocation of init method failed; nested exception is java.lang.NoSuchMethodError: org.springframework.core.serializer.support.DeserializingConverter
-- 版本对不上，要Spring和Spring-data-redis 和 redis和commons-lang3对应
-- 目前是4.1.7 + 1.6.0 + 2.9.0 + 3.3.2 编译通过了
-
+> [Java使用Redis](/Database/Redis.md#Java使用Redis)�置】
+> [Java使用Redis](/Database/Redis.md#Java使用Redis)se/Redis.md#Java使用Redis)�置】
+> [Java使用Redis](/Database/Redis.md#Java使用Redis)用Redis)is)

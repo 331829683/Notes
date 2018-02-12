@@ -1,9 +1,9 @@
-`目录`
+`目录 start`
+ 
 - [【文件管理】](#文件管理)
     - [基本命令](#基本命令)
         - [rename](#rename)
         - [cd](#cd)
-        - [time](#time)
         - [ls](#ls)
         - [chown](#chown)
         - [chgrp](#chgrp)
@@ -14,7 +14,11 @@
         - [rm](#rm)
         - [mv](#mv)
         - [wc](#wc)
+        - [cat](#cat)
+        - [file](#file)
         - [tail](#tail)
+        - [head](#head)
+        - [sed](#sed)
     - [【磁盘管理】](#磁盘管理)
         - [dd](#dd)
         - [mount](#mount)
@@ -24,13 +28,28 @@
     - [Tips](#tips)
         - [设置交换分区](#设置交换分区)
         - [善用.bashrc文件](#善用bashrc文件)
+    - [善用FTP](#善用ftp)
+        - [基础](#基础)
+        - [使用](#使用)
+        - [手机和电脑之间传输管理文件](#手机和电脑之间传输管理文件)
+            - [手机](#手机)
+            - [电脑](#电脑)
     - [在Linux上操作压缩文件的命令](#在linux上操作压缩文件的命令)
-        - [tar 归档 打包](#tar归档打包)
+        - [tar 归档 打包](#tar-归档-打包)
             - [压缩](#压缩)
             - [解压](#解压)
             - [总结](#总结)
+    - [常用文件](#常用文件)
+        - [划分](#划分)
+        - [使用](#使用)
+            - [查看发行版](#查看发行版)
+            - [查看系统所有用户信息](#查看系统所有用户信息)
 
+`目录 end` *目录创建于2018-02-10* | 更多: [CSDN](http://blog.csdn.net/kcp606) | [oschina](https://my.oschina.net/kcp1104) | [码云](https://gitee.com/kcp1104) 
+****************************************
 # 【文件管理】
+> Linux中认为万物皆文件
+
 ## 基本命令 
 
 ### rename
@@ -46,12 +65,23 @@
 - `cd !$` 把上个命令的参数作为cd参数使用。
 - `cd //` 系统根目录 
 
-### time
-- bash内置简易time `time` 和 /usr/bin/time `\time`
-    - `\time -v ls -al`
 
 ### ls
-- i详情 a全部 l 列
+- 参数
+    - i 详情 
+    - a 全部包含隐藏文件 A 不显示当前目录和上级目录 . .. 
+    - l 使用较长格式列出信息 详细信息
+    - h 人类可阅读
+    - F 标明文件夹,文件,可执行文件 
+    - w 100 限制输出每行的字符长度 0 则是无限制 和 l 共用就则无视该限制
+    - R 递归显示所有子文件夹
+    - r 逆序
+    - B 不列出以〜结尾的隐含条目
+    - t 按修改时间从顶至下,一般不单用,和 g|l 结合一起用
+    - c 按ctime(创建时间)一般是文件夹,文件则是修改时间排列
+        - 和 lt|gt 一起用 即 `ls -clt` 同上的排列顺序
+        
+- 输出
     - 输出类型：d 目录 l 软链接 b 块设备 c 字符设备 s socket p 管道 - 普通文件
     - 输出权限信息：r 读权限 w 写权限 x 执行权限
     - rwx有三个，是因为 `拥有者，所属用户组 其他用户` 代表的rwx权限
@@ -75,8 +105,13 @@
     - -i 输出文件的MIME类型
     - -F "#" 修改输出分隔符
 
+
 ### ln
-- `ln -s 文件或目录 link` 生成软链接（快捷方式）
+- `ln -s 源文件或目录 目标绝对路径` 生成软链接（快捷方式）
+_示例_
+```sh
+    ln -s `pwd`/a.md ~/a.md 
+```
 
 ### find
 - `find . -name "*.txt"` 查找当前目录的txt后缀的文件
@@ -113,6 +148,11 @@
 - cat mul.sh | wc -l
 - wc -l mul.sh
 
+### cat
+> 类似的还有 nl more less
+### file
+> 查看文件类型
+
 ### tail
 > tail命令用于输入文件中的尾部内容。tail命令默认在屏幕上显示指定文件的末尾10行。 来自: http://man.linuxde.net/tail
 
@@ -131,6 +171,21 @@
     tail +20 file （显示文件file的内容，从第20行至文件末尾） 
     tail -c 10 file （显示文件file的最后10个字符）
 ```
+### head
+> 查看文件头部, 前十行
+
+### sed
+> 参数 命令 文件
+
+- `参数`
+    - -n 直接在控制台输出的操作的结果，源文件不变 
+    - -i 在源文件中进行修改
+- `命令`
+    - p 打印
+    - a 新增 在下一行
+    - i 插入 在上一行 将hello插入到第4行：`sed -in "4i hello" test.md`
+    - c 替换 整行
+    - s 替换 字符串的替换
 
 *****************************
 ## 【磁盘管理】
@@ -165,27 +220,32 @@
 - du -sk * | sort -n
 - du -sk * | grep guojf //看一个人的大小
 - du -m | cut -d "/" -f 2 //看第二个/ 字符前的文字
-查看此文件夹有多少文件 /*/*/* 有多少文件
-du xmldb/
-du xmldb/*/*/* |wc -l
-40752
+
+- 查看此文件夹有多少文件 /*/*/* 有多少文件
+    du xmldb/
+    du xmldb/*/*/* |wc -l
+    40752
 
 *******************************
 ## Tips
 ### 设置交换分区
-- `free -h` 查看内存
-- `dd if=/dev/zero of=/swapfile bs=1024k count=4096` 创建一个4g 交换文件
-- `mkswap /swapfile` 格式化成交换文件的格式
-- ` swapon /swapfile` 启用该文件作为交换分区的文件
+- 查看内存 `free -h` 
+- 创建一个4g 交换文件 `dd if=/dev/zero of=/swapfile bs=1024k count=4096` 
+- 格式化成交换文件的格式 `mkswap /swapfile` 
+- 启用该文件作为交换分区的文件 ` swapon /swapfile` 
 - `/swapfile swap swap defaults 0 0` 写入`/etc/fstab`文件中，让交换分区的设置开机自启
 - `sudo sysctl vm.swappiness=15` 临时修改重启注销失效， 查看：`cat /proc/sys/vm/swappiness`
 - 永久修改：`/etc/sysctl.conf ` 文件中设置开始使用交换分区的触发值： `vm.swappiness=10`
     - 表示物理内存剩余`10%` 才会开始使用交换分区
 - `建议，笔记本的硬盘低于 7200 转的不要设置太高的交换分区使用，大大影响性能，因为交换分区就是在硬盘上，频繁的交换数据`
 
+`看着交换内存很大不爽`
+- 关闭交换分区 `sudo swapoff 交换分区文件`
+- 开启交换分区 `sudo swapon 交换分区文件`
+
 ### 善用.bashrc文件
 `Alias`
-```
+```sh
     if [ -f ~/.bash_aliases ]; then
         . ~/.bash_aliases
     fi
@@ -196,11 +256,11 @@ du xmldb/*/*/* |wc -l
 
 - 如我的文件 [.bash_aliases](/ConfigFiles/Linux/.bash_aliases)
     - K.h就能显示出每个命令的说明 其实现脚本： [python3文件](/Script/python/show_alias_help.py) 
-    - 建立链接就可以用了 `ln -s /home/kcp/Documents/Notes/Notes/ConfigFiles/Linux/.bash_aliases .bash_aliases` 
+    - 在别名文件目录时, 建立链接就可以用了 `ln -s `pwd`/.bash_aliases ~/.bash_aliases` 
 
 *************************
 `自定义桌面快捷方式文件`
-```
+```conf
 	[Desktop Entry] #每个desktop文件都以这个标签开始，说明这是一个Desktop Entry文件
 	Version = 1.0 #标明Desktop Entry的版本（可选）
 	Name = Firefox #程序名称（必须），这里以创建一个Firefox的快捷方式为例
@@ -215,6 +275,24 @@ du xmldb/*/*/* |wc -l
 - [示例文件](https://github.com/Kuangcp/Notes/tree/master/ConfigFiles/Linux/VSCode.desktop)
 - 如要将快捷方式放在启动菜单内 将desktop文件放在 `/usr/share/applications/` 目录下即可
 - 注意：目录不能有空格 等特殊字符
+
+************************************
+## 善用FTP
+
+### 基础
+
+### 使用
+- 登录`ftp host port`
+
+### 手机和电脑之间传输管理文件
+> 前提是两个设备处于同一个局域网, 也就是说连同一个WIFI, 或者电脑开热点给手机连?
+
+#### 手机
+> 手机安装 FeelFTP , 然后设置编码为utf-8, 开启服务器  
+> 或者安装ES文件浏览器, 也带有FTP服务器, 但是不稳定, 切出去就停了, 而且不能选择上SDK卡
+
+#### 电脑
+> 安装FileZila 建立连接, 然后就能方便的用鼠标进行传输了
 
 ************************************
 ## 在Linux上操作压缩文件的命令
@@ -263,22 +341,25 @@ du xmldb/*/*/* |wc -l
     - j tar.bz2
     - Z tar.Z
     - J tar.xz
-
-- `tar -cvf jpg.tar *.jpg` //将所有jpg打包成tar.jpg 
+- `tar -cvf jpg.tar *.jpg` //将所有jpg打包成 jpg.tar
 - `tar -czf jpg.tar.gz *.jpg `  //将所有jpg打包成jpg.tar后 生成gzip压缩的包，命名为jpg.tar.gz
 - `tar -cjf jpg.tar.bz2 *.jpg `//将所有jpg打包成jpg.tar后 生成bzip2压缩的包，命名为jpg.tar.bz2
 - `tar -cZf jpg.tar.Z *.jpg ` //将所有jpg打包成jpg.tar后 生成umcompress压缩的包，命名为jpg.tar.Z
 
 ******
-- `rar a jpg.rar *.jpg` //rar格式的压缩，需要先下载rar for linux
+- `rar a jpg.rar *.jpg` //rar格式的压缩
 
 ******
-- `zip jpg.zip *.jpg` //zip格式的压缩，需要先下载zip for linux
+- `zip images.zip *.jpg` //zip格式的压缩
 - `zip -r file.zip code/*` 压缩code目录下所有文件
     - `zip -r ./a.zip ./*` 压缩当前目录所有文件
-    - `-q`终端不输出 `-o` 输出文件`
-    -  `-r` 表示递归 `-l` 兼容Windows的换行符
-    -  `-e` 加密
+    - `-q`安静模式, 终端不输出
+    - `-o` 输出文件`
+    - `-r` 表示递归
+    - `-l` 兼容Windows的换行符
+    - `-e` 加密
+    - `-d filename` 在zip中删除某文件 删除某目录`dir/*`
+        - _注意_: 所有的文件和目录都是相对于zip的根目录的完整路径
 
 #### 解压
 - `tar -xvf file.tar` //解压 tar包
@@ -291,7 +372,10 @@ du xmldb/*/*/* |wc -l
 
 ***
 - `unzip file.zip `//解压zip
-    - -q 终端不输出 -d 指定目录 -l 查看不解压 -O 指定编码
+    - -q 终端不输出 
+    - -d 指定目录 
+    - -l 不解压,查看所有文件 
+    - -O 指定编码
 
 
 #### 总结
@@ -303,6 +387,24 @@ du xmldb/*/*/* |wc -l
     *.tar.bz2用tar -xjf 解压
     *.Z 用 uncompress 解压
     *.tar.Z 用tar -xZf 解压
-    *.rar 用 unrar e解压
+    *.rar 用 unrar e 解压
     *.zip 用 unzip 解压
 ```
+
+**************************
+## 常用文件
+### 划分
+
+### 使用
+
+#### 查看发行版
+`cat /etc/issue` 通用
+`cat /etc/redhat-release` redhat系
+
+_查看内核版本_
+`cat /proc/version`
+`uname -a`
+
+#### 查看系统所有用户信息
+> /etc/passwd 包含了用户,用户组,用户home目录 shell类型等信息  
+> 看第三个参数:500以上的,就是后面建的用户了.其它则为系统的用户.

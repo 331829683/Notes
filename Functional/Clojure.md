@@ -1,3 +1,11 @@
+`目录 start`
+ 
+- [Clojure](#clojure)
+    - [安装](#安装)
+    - [基础](#基础)
+
+`目录 end` *目录创建于2018-01-14*
+****************************************
 # Clojure
 ## 安装
 - [Clojure官网下载地址](https://clojure.org/community/downloads)
@@ -19,8 +27,8 @@ Clojure的设计原则可以概括成5个词汇：简单、专注、实用、一
 
 `Hello World`
 `java -cp clojure-1.8.0.jar clojure.main`进入REPL终端
-```
-user => (def hello(fn [] "hello"))
-user => (hello)
+```clojure
+    user => (def hello(fn [] "hello"))
+    user => (hello)
 ```
 

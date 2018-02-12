@@ -1,8 +1,83 @@
+`目录 start`
+ 
+- [Mysql](#mysql)
+    - [安装](#安装)
+        - [Ubuntu安装配置MySQL](#ubuntu安装配置mysql)
+        - [Docker安装](#docker安装)
+    - [图形化客户端](#图形化客户端)
+    - [基本数据类型](#基本数据类型)
+        - [decimal](#decimal)
+        - [LongBlob](#longblob)
+        - [1.mysql常用命令集合](#1mysql常用命令集合)
+            - [1.1【自增长】](#11自增长)
+            - [1.2【主键约束的修改】](#12主键约束的修改)
+            - [1.3【修改表名】](#13修改表名)
+            - [1.4【定界符】](#14定界符)
+            - [1.5【已有表数据，新建表】](#15已有表数据新建表)
+            - [1.6【查看所有连接状态】](#16查看所有连接状态)
+            - [1.7【查看表的状态】](#17查看表的状态)
+            - [1.8【关于时间 】](#18关于时间-)
+                - [1.8.1【常用函数】](#181常用函数)
+                - [1.8.2【获取当前时间与i个月之间的天数】](#182获取当前时间与i个月之间的天数)
+                - [1.8.3 【datetime 和 timestamp 区别】](#183-datetime-和-timestamp-区别)
+            - [1.9 【插入外码】](#19-插入外码)
+    - [2.【变量】](#2变量)
+    - [3.【基本流程语法】](#3基本流程语法)
+    - [4.【触发器】](#4触发器)
+        - [4.1【创建单语句的触发器】](#41创建单语句的触发器)
+        - [4.2【创建多语句的触发器】](#42创建多语句的触发器)
+        - [4.3【NEW 和 OLD关键字】](#43new-和-old关键字)
+    - [5.【存储过程】](#5存储过程)
+        - [基本结构示例：](#基本结构示例)
+    - [6. 【函数】](#6-函数)
+        - [【简单示例】](#简单示例)
+    - [7.【异常】](#7异常)
+    - [8.【用户管理】](#8用户管理)
+        - [查看](#查看)
+        - [创建](#创建)
+        - [修改](#修改)
+        - [【授权】](#授权)
+    - [mysql命令行参数](#mysql命令行参数)
+    - [mysql命令行实例](#mysql命令行实例)
+        - [常用五类约束](#常用五类约束)
+        - [mysql正确卸载](#mysql正确卸载)
+        - [数据类型](#数据类型)
+        - [常见函数](#常见函数)
+
+`目录 end` *目录创建于2018-01-21*
+****************************************
+
 # Mysql
 
 ## 安装
+### Ubuntu安装配置MySQL
+- 更新列表` sudo apt-get update `
+- 安装MySQL `sudo apt-get install mysql-server mysql-client`
+- 检查服务是否已经开启 ： `sudo netstat -tap | grep mysql `
+  - （启动显示cp 0 0 localhost.localdomain:mysql *:* LISTEN - ）
+- 启动服务 ： `sudo /etc/init.d/mysql restart `
+- 查看编码 ： `status` 或者 `show variables like 'character_set_%`
+`配置`
+- 打开配置文件： `sudo gedit /etc/mysql/mysql.conf.d/mysqld.cnf`
+    - `[mysqld]`下添加一行： `character-set-server=utf8`
+    - `[client]`下添加 `efault-character-set = utf8`
+    - 如果要允许远程访问，就注释掉 `bind-address`
+    - 如果是服务器要配置远程访问 就 bind-address=服务器IP
+    - 确保skip-networking被删除或者屏蔽，否则不支持TCP/IP 访问
+`重启`
+- 重启MySQL ：`sudo systemctl restart mysql`
 
+### Docker安装
+>[Docker安装MySQL](/Linux/Container/Container/Docker_Soft.md)
 
+- [博客：Mysql有没有必要Docker化](http://www.infoq.com/cn/articles/can-mysql-run-in-docker?utm_campaign=rightbar_v2&utm_source=infoq&utm_medium=articles_link&utm_content=link_text)
+
+## 图形化客户端
+> windows上就直接 MySQL-Font HeidiSQL Linux就终端了..虽然wine也能装这俩
+
+- [10个Mysql图形客户端](http://www.linuxidc.com/Linux/2015-01/111421.htm)
+
+***********
 ## 基本数据类型
 ###  decimal 
 -  The declaration syntax for a DECIMAL column is DECIMAL(M,D). The ranges of values for the arguments are as follows:
@@ -14,6 +89,7 @@
 ### LongBlob
 - 这种数据类型可以直接把图像文件存到数据库中！
 
+创建UTF8编码数据库 `CREATE DATABASE `test2` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci`
 
 ### 1.mysql常用命令集合
 #### 1.1【自增长】
@@ -49,7 +125,7 @@ show table status like 'assitant' 可以看到当前自动增长的id当前值 d
    - insert into data values ('Myth','4','2016-03-10',curtime());//年月日，时间
    - select datediff(curdate(), date_sub(curdate(), interval i month)); 
 - 一般函数是不能作为 default默认值的，使用只能在插入修改数据时使用
-##### 1.8.2【获取当前时间与i个月之间的天数 】
+##### 1.8.2【获取当前时间与i个月之间的天数】
 - 问题：假设当前是5月19 且（提前月份）i=1 就是计算从4月19到今天的天数
     - 解答：
 
@@ -140,12 +216,12 @@ TIMESTAMP(5) -> TIMESTAMP(6)
 ```
 
 ## 4.【触发器】
-#### 4.1【创建单语句的触发器】
+### 4.1【创建单语句的触发器】
 - CREATE TRIGGER ins_sum BEFORE INSERT ON account FOR EACH ROW SET @sum = @sum + NEW.amount;
 
 - CREATE TRIGGER trigger_name trigger_time trigger_event ON tbl_name FOR EACH ROW trigger_stmt
 
-#### 4.2【创建多语句的触发器】
+### 4.2【创建多语句的触发器】
 ```
       CREATE TRIGGER trigger_name trigger_time trigger_event
           ON tbl_name FOR EACH ROW
@@ -153,7 +229,7 @@ TIMESTAMP(5) -> TIMESTAMP(6)
           .......
       END
 ```
-#### 4.3【NEW 和 OLD关键字】
+### 4.3【NEW 和 OLD关键字】
 - 使用OLD和NEW关键字，能够访问受触发程序影响的行中的列（OLD和NEW不区分大小写）。在INSERT触发程序中，仅能使用NEW.col_name，没有旧行。
 - 在DELETE触发程序中，仅能使用OLD.col_name，没有新行。在UPDATE触发程序中，可以使用OLD.col_name来引用更新前的某一行的列，也能使用NEW.col_name来引用更新后的行中的列。
 - 用OLD命名的列是只读的。你可以引用它，但不能更改它。对于用NEW命名的列，如果具有SELECT权限，可引用它。
@@ -162,7 +238,7 @@ TIMESTAMP(5) -> TIMESTAMP(6)
 - 在BEFORE触发程序中，AUTO_INCREMENT列的NEW值为0，不是实际插入新记录时将自动生成的序列号。
 
 ## 5.【存储过程】
-#### 基本结构示例：
+### 基本结构示例：
 ```
        【loop】 要有iterate 和leave才是完整的
         CREATE PROCEDURE doiterate(p1 INT)
@@ -181,7 +257,7 @@ TIMESTAMP(5) -> TIMESTAMP(6)
 
 
 ## 6. 【函数】
-##### 【简单示例】
+### 【简单示例】
 
 ```
       ---函数部分,修改定界符 
@@ -225,6 +301,7 @@ select fun_test(8,'d');
 
 - 创建用户 `CREATE USER 'username'@'host' IDENTIFIED BY 'password';`
 - 设置密码 `SET PASSWORD FOR 'username'@'%' = PASSWORD("123456");`
+    - 修改密码也是这个语句注意的是要  `flush privileges;`
 - 删除用户 `drop user 'username'@'host'`
     - 如果服务器需要远程访问 修改配置文件`/etc/mysql/mysql.conf.d/mysqld.cnf`，注释掉 bind_address 一行
 ```
@@ -676,3 +753,4 @@ begin
 update class set birthday=19530302;
 end//
 delimiter ;
+er ;

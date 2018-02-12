@@ -1,16 +1,34 @@
-# Springboot集成SpringSecurity
+`目录 start`
+ 
+- [Springboot集成SpringSecurity](#springboot集成springsecurity)
+    - [Demo](#demo)
+        - [快速上手-初步入门：](#快速上手-初步入门)
+            - [创建单用户单角色的安全控制](#创建单用户单角色的安全控制)
+            - [多用户多角色的实现思路](#多用户多角色的实现思路)
+                - [每个身份都使用一个登录实体类](#每个身份都使用一个登录实体类)
+                - [另一种思路：](#另一种思路)
+    - [实现细节](#实现细节)
+        - [关于注解的几种使用方式](#关于注解的几种使用方式)
+            - [@Secured](#@secured)
+            - [@RolesAllowed](#@rolesallowed)
+            - [SpringSecurity3.0 开始提供了 SpEL表达式](#springsecurity30-开始提供了-spel表达式)
+        - [保护方法应用](#保护方法应用)
 
+`目录 end` *目录创建于2018-01-14*
+****************************************
+# Springboot集成SpringSecurity
+## Demo
 ### 快速上手-初步入门：
 #### 创建单用户单角色的安全控制
 - 添加依赖
-```
+```xml
    <dependency>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-security</artifactId>
 	</dependency>
 ```
 
-```
+```java
     @Configuration
     public class SecurityConfig extends WebSecurityConfigurerAdapter {
       @Autowired
@@ -44,10 +62,10 @@
     }
 ```
 `Repository类`
-```
+```java
    public interface ReaderRepository extends JpaRepository<Reader, String> {}
 ```
-```
+```java
     //登录实体类
     @Entity
     public class Reader implements UserDetails {
@@ -88,7 +106,7 @@
     
 - `Author` `Admin` `Reader` 三个类
 `继承了UserDetails接口的实体类的配置`
-```
+```java
     //配置多对多的关系，用户和角色（权限）之间的关系,是通用的改下属性名即可
     @ManyToMany(cascade = {CascadeType.REFRESH},fetch = FetchType.EAGER)
     private List<AllRoles> roles ;
@@ -113,7 +131,7 @@
     @Override
     public boolean isEnabled() {return true;}
 ```
-###### 每个身份都使用一个登录实体类
+##### 每个身份都使用一个登录实体类
 - 然后使用不同的dao层查询，显然的实体类登录查询的效率及其低且不易扩展
 - 设置好`spirng.jpa.hibernate.ddl-auto=update`
 - 第一次运行还会有没有实体对应的表这样的提示,说明了他正在根据多对多映射创建实体表，也体现了这个多种用户模式下需要实体等量的连接表
@@ -122,7 +140,7 @@
     - 也可以考虑使用一个字符串，然后用`特殊字符`把类型放进去，然后正则取出来
     - 登录页面就需要自定义一个函数进行拼接（或者使用校验来拼接？）
       
-###### 另一种思路：
+##### 另一种思路：
 - 使用一个登录用户表（序列id，用户名，密码，用户编码（对应多张表））
 - 角色表（序列id，用户编码，角色） 
 这样的话扩展就只要加表，使用同一个主键生成策略就可以了
@@ -141,7 +159,7 @@
 - 但是都是有局限性，只能判断请求是否有权限，不能进行更多的自定义判断
 #### SpringSecurity3.0 开始提供了 SpEL表达式
 `需要先配置这个配置类，后面的注解才会生效`
-```
+```java
     @Configuration
     @EnableGlobalMethodSecurity(prePostEnabled = true)
     public class MethodSecurityConfig extends GlobalMethodSecurityConfiguration{}
@@ -183,3 +201,10 @@
         - `return ex;`
     
     
+### 保护方法应用
+- @Secured 注解限制方法调用
+
+## 社交登录
+> [SpringForAll社区:Spring Security源码分析（三）：Spring Social实现QQ社交登录 ](https://mp.weixin.qq.com/s?__biz=MzU0MDEwMjgwNA==&mid=2247484230&idx=1&sn=358f684bd122888270730f2b102ee1b2&chksm=fb3f1abdcc4893ab9dc400a44edfe7a9d483c070b78db1d81f70c4a3d7870d113d9287d81b0f&mpshare=1&scene=1&srcid=0121kLxdu4ezkmeJAoJcdMZ1&pass_ticket=LGmo8DCbLhUXTV%2FDVv1W9SyGxNSXxxYLrKODVeXD8f3lkWt2HnMB5b7racYt5W6V#rd)  
+> [SpringForAll社区:Spring Security 源码分析（四）：Spring Social实现微信社交登录 ](https://mp.weixin.qq.com/s?__biz=MzU0MDEwMjgwNA==&mid=2247484233&idx=1&sn=1e84ffd8c9169db56a0d48ccb31bc842&chksm=fb3f1ab2cc4893a4263799c466d73ee67971ce9deb22a91b8ae8e968621679de3bce83a2c558&mpshare=1&scene=1&srcid=0121cjpvaOeB0nktdOSQNitj&pass_ticket=LGmo8DCbLhUXTV%2FDVv1W9SyGxNSXxxYLrKODVeXD8f3lkWt2HnMB5b7racYt5W6V#rd)
+

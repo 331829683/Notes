@@ -1,3 +1,45 @@
+`目录 start`
+ 
+- [Python](#python)
+    - [简介](#简介)
+        - [关于Python2.x与3.x的使用](#关于python2x与3x的使用)
+    - [【基础数据类型】](#基础数据类型)
+            - [运算符](#运算符)
+    - [【基础语法】](#基础语法)
+        - [【import】](#import)
+    - [【输入输出】](#输入输出)
+        - [读取命令行参数](#读取命令行参数)
+        - [【序列】](#序列)
+            - [【列表】](#列表)
+            - [【元组】](#元组)
+            - [【字符串】](#字符串)
+            - [字符串编码问题(python 2问题)：](#字符串编码问题python-2问题)
+            - [字典（键值对）](#字典（键值对）)
+        - [【基本运行结构】](#基本运行结构)
+        - [【函数】](#函数)
+        - [变量](#变量)
+        - [【类】](#类)
+            - [继承](#继承)
+        - [【异常】](#异常)
+        - [【文件】](#文件)
+        - [【测试】](#测试)
+        - [【GUI】](#gui)
+            - [Tkinter](#tkinter)
+            - [wxPython](#wxpython)
+            - [Qt5](#qt5)
+        - [【数据库】](#数据库)
+            - [【MySQL】](#mysql)
+            - [【Redis】](#redis)
+                - [安装](#安装)
+                - [使用](#使用)
+        - [【绘图】 matplotlib](#绘图-matplotlib)
+    - [【代码风格】](#代码风格)
+    - [【常见函数】](#常见函数)
+    - [【常见库】](#常见库)
+    - [QT](#qt)
+
+`目录 end` *目录创建于2018-01-21*
+****************************************
 # Python
 ## 简介
 
@@ -64,8 +106,9 @@
 ## 【输入输出】
 ### 读取命令行参数
 > [参考博客](http://www.sharejs.com/codes/python/6121)
+
 `只有输入参数，没有选项`
-```
+```python
     import sys
     print("脚本名：", sys.argv[0])
     for i in range(1, len(sys.argv)):
@@ -76,7 +119,7 @@
 
 `有选项`
 `getopt.getopt(args, options[, long_options])`
-```
+```python
     import sys, getopt
     opts, args = getopt.getopt(sys.argv[1:], "hi:o:")
     for op, value in opts:
@@ -87,7 +130,7 @@
     - 所以"hi:o:"就表示"h"是一个开关选项(单单的-h)；"i:"和"o:"则表示后面应该带一个参数。
 - 调用getopt函数。函数返回两个列表：`opts和args`。opts为分析出的格式信息。args为不属于格式信息的剩余的命令行参数。
     - opts是一个两元组的列表。每个元素为：(选项串,附加参数)。如果没有附加参数则为空串''。
-getopt函数的第三个参数[, long_options]为可选的长选项参数，上面例子中的都为短选项(如-i -o)
+    - getopt函数的第三个参数[, long_options]为可选的长选项参数，上面例子中的都为短选项(如-i -o)
 - 长选项格式举例:
     - `--version`
     - `--file=error.txt`
@@ -104,7 +147,7 @@ getopt函数的第三个参数[, long_options]为可选的长选项参数，上�
 - `乘`：lista*4
 - `判断是否存在`：`in` `not int`
 - len() 
-- min() max() sum()要求元素全是数值
+- min() max() sum() 要求元素全是数值
 
 *****
 #### 【列表】
@@ -120,7 +163,6 @@ getopt函数的第三个参数[, long_options]为可选的长选项参数，上�
     - 原始的定义就是 lists = [1, 2, 4]
     - 若要定义连续列表 lists = range(0, 100) 得到的是range对象不是列表对象
     - 若要定义大小1000全为0列表 lists = [0 for x in range(0, 1000)]
-
 - 二维数组的定义：
     - 原始： lists = [[1, 2], [3, 4]]
     - 仿造一维的定义： lists = [[0 for x in range(10)] for y in range(10)] 10*10 初始为0的列表
@@ -162,7 +204,7 @@ getopt函数的第三个参数[, long_options]为可选的长选项参数，上�
     - `title()` 首字母大写 
 
 ****
-字符串，列表，元组相互转换：
+`字符串，列表，元组相互转换：`
 - 字符串-列表 ： list("python")
 - 字符串-元组：tuple("python")
 - 列表或元组-字符串 join(obj) 参数是列表或元组类型，其元素只能是字符串类型
@@ -173,16 +215,16 @@ getopt函数的第三个参数[, long_options]为可选的长选项参数，上�
 - [ Python 3的bytes/str之别 ](http://www.ituring.com.cn/article/1116)
 ![str和bytes的关系](https://raw.githubusercontent.com/Kuangcp/ImageRepos/masters/Tech/python/str_bytes.jpeg)
 
-- encode("utf-8") str -> bytes
-- decode() bytes -> str
+- `encode("utf-8")`： str -> bytes
+- `decode()`： bytes -> str
 
-```
+```python
     # coding:utf-8
     unicode_str = unicode('使用',encoding='utf-8')
     print unicode_str.encode('utf-8')
 ```
 
-```
+```python
     import codecs
     codecs.open('filename',encoding='utf-8')
 ```
@@ -206,7 +248,7 @@ getopt函数的第三个参数[, long_options]为可选的长选项参数，上�
     - 删除指定键并返回值 ：pop() 
     - 合并另一个字典：update() 
     - in 
-- 嵌套
+- 嵌套：
     - 字典套列表 `{'d':['we','e']}` 
     - 列表套字典，当成普通类型包含即可
     - 字典套字典
@@ -214,9 +256,10 @@ getopt函数的第三个参数[, long_options]为可选的长选项参数，上�
 ***********
 
 ### 【基本运行结构】
-- 输入输出
+- 输入输出：
     - input("") 默认当成字符串输入 数值：int() 强转一下
-    - print("")      
+    - print("")
+        - 输出不带换行  print('', '', end='')
 - 选择：
     - if elif else
 - for循环：
@@ -226,7 +269,7 @@ getopt函数的第三个参数[, long_options]为可选的长选项参数，上�
     - `while True:`` while ‘2’ in nums:`` while num<2:`  
     - `while 列表: ` 直到列表为空退出循环
 
-```
+```python
     if (b==0) and (a==1) :
         pass
         print("pass")
@@ -249,7 +292,6 @@ getopt函数的第三个参数[, long_options]为可选的长选项参数，上�
     - 多个指定名称实参 `create(age, **name)` `create(12, name='d', lo=23)` 
         - 必须要指定名称 这是名为name的键值对`字典`
         - 错误：create(12,d=23,3,3,3)
-
     - 注意：
         - `def hi(name, age=0, *names, **s)` `hi('d', 23,34, d=6) ` age会被赋值23
         - `def hi(name, *names, age=0, **s)` `hi('d', 23,34, d=6)` 这样写age就不会赋值，除非指定名称 age=23
@@ -266,7 +308,7 @@ getopt函数的第三个参数[, long_options]为可选的长选项参数，上�
 - 局部变量：
 - 全局变量：定义在函数外的变量，也称公用变量，函数中 `global x` 声明引用全局变量x
 
-************************************
+*******************
 ### 【类】
 `Python 不存在多态，存在鸭子类型` [博客介绍](http://blog.csdn.net/shangzhihaohao/article/details/7065675)
 - 写在一个py文件里，默认构造器，可以加参数 `def __init__(self):`
@@ -277,7 +319,7 @@ getopt函数的第三个参数[, long_options]为可选的长选项参数，上�
     - 类属性可以修改，但是实际上只能修改实例属性（这个修改只是声明了同名的实例属性，引用的时候就会覆盖类属性，看起来就是修改了
         - 可以删除实例属性，然后就能看到原有的类属性了 
 
-```
+```python
     class People:
         name = 'md'
     p = People()
@@ -293,8 +335,7 @@ getopt函数的第三个参数[, long_options]为可选的长选项参数，上�
     - `def __init__(self)`
     - `def __del__(self)`
 
-
-```
+```python
     class Person:
         # 对象方法， 将对象作为参数self传进去
         def say(self):
@@ -332,7 +373,7 @@ getopt函数的第三个参数[, long_options]为可选的长选项参数，上�
 
 ******************************************
 ### 【异常】
-```
+```python
     try:
         print(5/0)
     except ZeroDivisionError:
@@ -379,15 +420,15 @@ getopt函数的第三个参数[, long_options]为可选的长选项参数，上�
 *****************
 ### 【文件】
 - 注意路径，Windows系统中要使用反斜杠 \ 
-  最简单：`file = open('')` 只读打开
-  `使用with来操作 好处是Python自动关闭文件`
-```
+- 最简单：`file = open('')` 只读打开
+- `使用with来操作 好处是Python自动关闭文件`
+```python
     with open('filename') as name: 
         name.read()
 ```
 - 为写打开新文本文件只读 `file = open('a.txt','w+'[,coding='utf-8'])` 打开删空
 - `file.write('')`
-- 使用os模块
+- `os模块`
     - `os.rename('filename1','filename2') ` mv 
     - `os.remove('filename.py')` rm
     - `os.listdir(path)` ls 
@@ -395,13 +436,14 @@ getopt函数的第三个参数[, long_options]为可选的长选项参数，上�
     - `os.makedirs(r'path')` mkdir
     - `os.chdir('')` 改变一个目录
     - `os.rmdir('')` 删除该目录，前提是空目录
-- os.path模块
+
+- `os.path模块`
     - abspath('') 获取绝对路径
-    - exists('')
-    - isdir('')
-    - isfile('') 
-    - islink('')
-    - getsize()
+    - exists('') 是否存在
+    - isdir('') 是否是一个目录
+    - isfile('')  是否是文件
+    - islink('') 是否是软链接硬链接文件
+    - getsize() 获取文件尺寸
 
 - shutil模块
     - dir() 复制单个文件
@@ -426,7 +468,7 @@ getopt函数的第三个参数[, long_options]为可选的长选项参数，上�
 
 
 `json `
-```
+```python
     alien = {'color': 'green', 'age': '23'}
     files = 'a.json'
     with open(files, 'w') as o:
@@ -445,6 +487,7 @@ getopt函数的第三个参数[, long_options]为可选的长选项参数，上�
 - 直接运行 unittest.main()
 - 输出结果，`. 测试通过` `E 测试运行错误` `F 测试断言不通过`
 
+****************
 ### 【GUI】
 #### Tkinter
 `安装`
@@ -458,19 +501,32 @@ getopt函数的第三个参数[, long_options]为可选的长选项参数，上�
 
 #### Qt5
 
+************
 ### 【数据库】
 #### 【MySQL】
 - python3环境下： `sudo apt install python3-mysqldb`
+- `sudo apt install libmysqlclient-dev`
+- `sudo pip install mysql-python`
+
 
 #### 【Redis】
+##### 安装
 - python2 `sudo pip install redis`
 - python3 `sudo pip3 install redis`
 
+##### 使用
+- 使用的接口方法是和redis一样的
+    - [Redis笔记传送门](Database/Redis.md)
+
+
+********************
 ### 【绘图】 matplotlib
 `python 3.5 安装`
 sudo apt install python3-matplotlib 
 sudo apt install python3.5-dev python3.5-tk tk-dev
 sudo apt install libfreetype6-dev g++
+
+
 
 ************
 ## 【代码风格】
@@ -496,7 +552,7 @@ sudo apt install libfreetype6-dev g++
 - import codecs 编码
 - import os 
 
-```
+```python
     import time
     import shlex
     import datetime
@@ -527,14 +583,16 @@ sudo apt install libfreetype6-dev g++
         return str(sub.returncode)
 ```
 
+- [python-excel](http://www.python-excel.org/)
+********************
 ## QT
 - 在Terminal中输入:sudo apt-get install qt4-dev-tools qt4-doc qt4-qtconfig qt4-demos qt4-designer
 ```
-qt4-dev-tools 中包括了Qt Assistant,Qt Linguist,Qt Creator
-qt4-doc 这个是帮助文档
-qt4-qtconfig Qt的配置工具,这个装好默认好
-qt4-demos 官方的一些Demo
-qt4-designer 可视化窗体设置工具
+    qt4-dev-tools 中包括了Qt Assistant,Qt Linguist,Qt Creator
+    qt4-doc 这个是帮助文档
+    qt4-qtconfig Qt的配置工具,这个装好默认好
+    qt4-demos 官方的一些Demo
+    qt4-designer 可视化窗体设置工具
 ```
 
 

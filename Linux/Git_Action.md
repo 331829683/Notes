@@ -1,19 +1,29 @@
-# Git实际使用的记录
-`目录`
-- [Tips](#tips)
-    - [安装最新版git](#安装最新版git)
-    - [【目前使用git的方法】](#目前使用git的方法)
-    - [实验楼使用Github](#实验楼使用github)
-    - [【git初始化】](#git初始化)
-    - [【VI编辑器的使用】](#vi编辑器的使用)
-    - [【GitHub】](#github)
+`目录 start`
+ 
+- [Git实际使用的记录](#git实际使用的记录)
+    - [Tips](#tips)
+    - [配置记住密码](#配置记住密码)
+    - [【安装】](#安装)
+        - [Linux(debian系)](#linuxdebian系)
+        - [windows](#windows)
+    - [【简单使用】](#简单使用)
+        - [配置GPG](#配置gpg)
+        - [实验楼上使用Github](#实验楼上使用github)
+        - [码云](#码云)
+    - [【git初始化配置】](#git初始化配置)
+        - [【VI编辑器的使用】](#vi编辑器的使用)
+    - [【配置SSH连接上Github】](#配置ssh连接上github)
+        - [Github上fork别人项目的操作](#github上fork别人项目的操作)
+            - [合并对方最新代码](#合并对方最新代码)
         - [【.gitingnore文件】](#gitingnore文件)
-        - [【建立本地仓库并关联到远程仓库】](#建立本地仓库并关联到远程仓库)
-        - [【使用git daemon搭建本地简易Git_Server】](#使用gitdaemon搭建本地简易git_server)
-        - [【HTTP访问Git_Server】](#http访问git_server)
+        - [终端中显示当前分支](#终端中显示当前分支)
+        - [命令的自动补全](#命令的自动补全)
+    - [搭建Git服务器](#搭建git服务器)
+        - [【使用git daemon搭建本地简易Git_Server】](#使用git-daemon搭建本地简易git_server)
+        - [【HTTP访问Git服务器】](#http访问git服务器)
             - [【配置HTTPS】](#配置https)
             - [【使用SSH登录GitServer】](#使用ssh登录gitserver)
-    - [【基础命令】](#基础命令)
+    - [【基础命令解释】](#基础命令解释)
     - [【reset命令常用方式】](#reset命令常用方式)
         - [1.回滚add操作](#1回滚add操作)
         - [2.回滚最近一次commit](#2回滚最近一次commit)
@@ -25,28 +35,32 @@
         - [8.Reset一个单独的文件](#8reset一个单独的文件)
         - [9.保留working_tree并且丢弃一些commit](#9保留working_tree并且丢弃一些commit)
 
-# Tips
-* 1 、虽然在物理上本地仓库中所有文件是放在一起的，但是分支之间是互不能访问以及操作的
-* 2 、在本地的每次commit都是有index的，上传到github可以不用那么频繁，反正都是有记录的
-* 3、 在github上修改了项目后，或者以后是和别人一起开发，就要先git pull origin （master）将别人的分支和自己的分支都拉下来确保是最新，
-    * 再进行git push -u origin master 才能正确提交代码，如果不pull，提交是注定失败的，还会扰乱分支图
-* 4、在github上修改文件，容易引起编码的变化，这时候没有pull就修改文件再commit也是会在push的时候很麻烦，最好在本地修改文件
-	最好是，在github上修改了就在本地pull之后再修改文件，万一出错了回退也简单
-* 5、出现了冲突，从而无法自动merge：
+`目录 end` *目录创建于2018-02-06* | 更多: [CSDN](http://blog.csdn.net/kcp606) | [oschina](https://my.oschina.net/kcp1104) | [码云](https://gitee.com/kcp1104) 
+****************************************
+# Git实际使用的记录
+## Tips
+1. 虽然在物理上本地仓库中所有文件是放在一起的，但是分支之间是互不能访问以及操作的
+2. 在本地的每次commit都是有index的，上传到github可以不用那么频繁，反正都是有记录的
+3. 在github上修改了项目后，或者以后是和别人一起开发，就要先git pull origin （master）将别人的分支和自己的分支都拉下来确保是最新，
+    - 再进行git push -u origin master 才能正确提交代码，如果不pull，提交是注定失败的，还会扰乱分支图
+4. 在github上修改文件，容易引起编码的变化，这时候没有pull就修改文件再commit也是会在push的时候很麻烦，最好在本地修改文件
+    - 最好是，在github上修改了就在本地pull之后再修改文件，万一出错了回退也简单
+5. 出现了冲突，从而无法自动merge：
 ```
-        git pull 对方的分支
-        git checkout 自己的分支
-        git merge --no-ff 对方的分支
-        git push （自己的源+分支）origin master
+    git pull 对方的分支
+    git checkout 自己的分支
+    git merge --no-ff 对方的分支
+    git push （自己的源+分支）origin master
 ```
-* 6. 当不想把隐私的配置文件上传github时，就可以.gitignore中忽略掉配置文件，然后建立模板文件夹放待配置的文件即可
-* 7.`cat ~/.ssh/id_rsa.pub | xclip -sel clip` 复制公钥
-* 8.java代码质量监测平台 codacy特别在意test里用断言 codebeat特别在意类和方法的长度
-* 9. 当大量文件出现mode的变化（因为你的目录移动，文件权限变化等影响的）可以设置忽略掉 git config core.fileMode false
-    * 当复制备份出去，然后重装系统粘贴回来，权限就变了，mode也变了，可以设置忽略掉改变，继续使用仓库，看着不爽的话就不备份，提交好后，新系统克隆即可，不过网速就。。。。。
+6. 当不想把隐私的配置文件上传github时，就可以.gitignore中忽略掉配置文件，然后建立模板文件夹放待配置的文件即可
+7. `cat ~/.ssh/id_rsa.pub | xclip -sel clip` 复制公钥
+8. java代码质量监测平台 codacy特别在意test里用断言 codebeat特别在意类和方法的长度
+9. Linux下当大量文件出现mode的变化（因为你的目录移动，文件权限变化等影响的）可以设置忽略掉 `git config core.fileMode false`
+    * 当将目录备份出去，然后重装系统粘贴回来，权限就变了，mode也变了，可以设置忽略掉改变，继续使用仓库，看着不爽的话就提交到远程，新系统克隆即可，不过网速就...
+10. git status 中文乱码 执行`git config --global core.quotepath false`即可
 
-**********
--  Windows下记住密码 ： 
+## 配置记住密码
+-  `Windows下记住密码` ： 
     * 新建环境变量 HOME 值：`%USERPROFILE%`
     * 在C盘User下你的当前用户目录下新建` _netrc `文本文件： 
         * `machine https://github.com/Kuangcp/`
@@ -54,7 +68,7 @@
         * `password ***` 
     * 成功配置，测试便知
 
-- Linux下记住密码：(如果使用了多个github账号，设置这个后只能使用一个账号的自动登录，另一个账号将完全连不上github，ssh也只能一个账号配一个，不能多个账号用一个ssh)
+- `Linux下记住密码`：(如果使用了多个github账号，设置这个后只能使用一个账号的自动登录，另一个账号将完全连不上github，ssh也只能一个账号配一个，不能多个账号用一个ssh)
     * `touch .git-credentials`
     * `vim .git-credentials`
     * 输入： ` http://{username}:{password}@github.com` 或者是https开头
@@ -62,97 +76,52 @@
     * `~/.gitconfig` 文件中多了以下内容即可
         * [credential]
         * helper = store
-- ssh 方法：（推荐）
+
+- `ssh 方法：（推荐）`
     - `ssh-keygen` 不设置密码
     - `cat ~/.ssh/id_rsa.pub | xclip -sel clip`  添加即可
 
-********    
+*********
 - 关于许可证 [Github许可证网](https://choosealicense.com/licenses/)
     - 新建项目的时候可以选择 添加.gitignore和许可证类别 许可证大致分为 MIT Apache2.0 GPL 
     - `MIT` 简单宽松的许可证，任何人可以拿代码做任何事与我无关` eg: jQuery、Rails` 
     - `Apache` 关注于专利，这类似于MIT许可证，但它同时还包含了贡献者向用户提供专利授权相关的条款。 `Apache、SVN和NuGet`
     - `GPL` 关注于共享改进，这是一种copyleft许可证，要求修改项目代码的用户再次分发源码或二进制代码时，必须公布他的相关修改。 `Linux、Git`
 
-***************************************************************	
-## 安装最新版git
-- `sudo add-apt-repository ppa:git-core/ppa` 如果命令找不到就先安装这个 `sudo apt-get install software-properties-common`
-- `sudo apt update`
+**********
+## 【安装】 
+### Linux(debian系)
 - `sudo apt-get install git`
 
-## 【目前使用git的方法】 
+`安装最新版本`
+- `sudo add-apt-repository ppa:git-core/ppa` 
+    - 如果命令找不到就先安装这个 `sudo apt-get install software-properties-common`
+- `sudo apt update`
+- `sudo apt install git`
 
+### windows
+- 直接搜索git-for-windows 建议使用360搜索,会有360的下载链接,无意间发现 毕竟官网的下载速度不敢恭维
+
+**************
+## 【简单使用】 
+
+*Github下拉到eclipse*
 - 1.在GitHub上新建一个项目，不勾选初始化，复制下URL
 - 2.在eclipse新建项目然后在eclipse里添加git remote
 - 3.commit -》push 完成
-- 4.打开Git Bash 使用命令行再查看一下，虽然有时候问题比较奇怪，但是一般不会有啥问题
+- 4.打开Git Bash 使用命令行再查看一下
 
-*本地关联远程*
+*本地已有代码关联远程空仓库*
+- 先在远程建立空仓库 一般各大平台也都有命令提示 
+    - 传送门: [Gitee](https://gitee.com) | [Github](https://github.com/) | [Bitbucket](https://bitbucket.org/)  | [GitLab](https://gitlab.com/) ...
 ```
    	git remote add origin https://github.com/Kuangcp/StudentManager.git
-   	git push -u origin master
+   	git push -u origin master 
 ```
-## 实验楼使用Github
-- `git clone URL` 复制下来，默认是master
-- `git branch 新分支名` 新建一个分支，切换过去，使用的就是这个新分支放代码
-- `git push origin 新分支名` add commit 之后就push
-- `git fetch origin 已有分支` 下拉别的分支代码
+- 说明下上面的命令 第一条是设置了一个远程仓库 仓库名为origin URL是后面那个,一般默认的远程仓库名都叫origin
+    - 名字可以随便取 但是提交就要标明仓库名了,而且分支也是一样的默认是master可以自己加别的分支. `git push -u 随便 随意`
 
-**************************************************
-## 【git初始化】 
-```
-	$git config --global user.name " "
-	$git config --global user.email " "
-	$git config --global color.ui  auto 
-```
-> 如果是多个账号使用同一台电脑就不要配置这个，单独配置仓库的名字，邮箱即可<br/>
-> `git config user.name ""`
-
-## 【VI编辑器的使用】
-- git 在pull或者合并分支的时候有时会遇到打开 VI编辑器 的状态  可以不管(直接下面3,4步)
-`如果要输入解释的话就需要:`
-```
-    1.按键盘字母 i 进入insert模式
-    2.修改最上面那行黄色合并信息,可以不修改
-    3.按键盘左上角"Esc"
-    4.输入`:wq`,按回车键即可 
-```
-
-## 【GitHub】 
-```
-    【Markdown语法】: 
-        @用户名， @组织名 ；#编号 会连接到该仓库对应的Issue编号 。
-        通过 用户名/仓库名 #编号 来指定仓库的指定Issue
-    【将Bash和GitHub绑定起来】：
-        1.在GItHub上设置SSH key， 有一个即可
-        2.$ssh-keygen -t rsa -C "Kuangchengping@outlook.com" 回车 
-        3.设置密码 ad14293366
-        4.测试SSH $ssh -T git@github.com  输入yes 输入 密码  ****
-```
-
-### 【.gitingnore文件】
-- `test.txt`  忽略该文件
-- `*.html`  忽略所有HTML文件
-- `*[o/a]`  忽略所有o和a后缀的文件
-- `!foo.html`  不忽略该文件
-- 示例文件
-```
-      # maven #
-      target/
-      
-      # IDEA #
-      .idea/
-      *.iml
-      out/
-      # eclipse #
-      bin/
-      .settings/
-      .metadata/
-      .classpath
-      .project
-      Servers/
-```
-
-### 【建立本地仓库并关联到远程仓库】
+*建立本地空仓库并关联到远程仓库*
 - 1.先在GitHub上创建一个仓库，不勾选README（不然添加远程仓库还得pull一下README文件才能push）
 - 如果本地没有则 `mkdir 库名 `创建一个文件夹，最好和远程的库同名
 - 2.在某本地项目根目录下运行 `Git Bash`
@@ -162,10 +131,132 @@
     - 2.4 `git push -u origin master` 输入用户名，密码 （若因为没有上游节点就按提示输入命令建立初始节点即可 git push --setupstream origin master）
     - 原因是没有指定本地dev分支与远程origin/dev分支的链接，根据提示，设置dev和origin/dev的链接：`git branch --set-upstream dev origin/dev` master同理
 
+### 配置GPG
+> [阮一峰:GPG入门教程](http://www.ruanyifeng.com/blog/2013/07/gpg.html)
+
+- 能够提高安全性,但是麻烦,不过向来这两者就是不可兼得的.
+
+*********************
+### 实验楼上使用Github
+> 方便学习使用 
+
+- `git clone URL` 复制下来，默认是master
+- `git branch 新分支名` 新建一个分支，切换过去，使用的就是这个新分支放代码
+- `git push origin 新分支名` add commit 之后就push
+- `git fetch origin 已有分支` 下拉别的分支代码
+
+### 码云
+> [帮助文档](http://git.mydoc.io/) 
+
+- [如何进行减少提交历史数量以及修改自己的commit中的邮箱](http://git.mydoc.io/?t=83152)
+- [改写历史，永久删除git库的物理文件 ](https://my.oschina.net/jfinal/blog/215624?fromerr=ZTZ6c38X)
+********************************
+## 【git初始化配置】 
+```
+	git config --global user.name " "
+	git config --global user.email " "
+	git config --global color.ui  auto 
+```
+> 如果是多个账号使用同一台电脑就不要配置这个，单独配置每个仓库下的用户名，邮箱即可<br/>
+> `git config user.name ""`
+
+### 【VI编辑器的使用】
+- 在pull或者合并分支的时候有时会遇到打开 VI编辑器 的状态  可以不输入(直接下面3,4步)
+`如果要输入解释的话就需要:`
+```
+    1.按键盘字母 i 进入insert模式
+    2.修改最上面那行黄色合并信息,可以不修改
+    3.按键盘左上角"Esc"
+    4.输入`:wq`,按回车键即可 或者 :x
+```
+
+## 【配置SSH连接上Github】 
+> 其他平台类似
+
+- 【Markdown语法】: 
+    - @用户名， @组织名 ；#编号 会连接到该仓库对应的Issue编号 。
+    - 通过 用户名/仓库名 #编号 来指定仓库的指定Issue
+- 【将Bash和GitHub绑定起来】：
+    - 1.在GItHub上设置SSH key， 有一个即可
+    - 2.$ssh-keygen -t rsa -C "Kuangchengping@outlook.com" 生成一个具有指定邮箱的rsa密钥对,然后复制到平台上
+    - 3.设置密钥对密码. 当然为了偷懒就不设置,不然每次提交都要输入....
+    - 4.测试SSH连接  $ssh -T git@github.com 输入 密钥对 密码
+        - 询问将github的ip加入已知列表中 选择yes
+
+### Github上fork别人项目的操作
+
+#### 合并对方最新代码
+> 1.首先fork一个项目, 然后clone自己所属的该项目下来,假设原作者A自己为B  
+> 2.进入项目目录,添加原作者项目的URL到该项目的远程分支列表中 `git add remote A A_URL`  
+> 3.fetch源到本地 `git fetch A`  
+> 4.合并两个分支代码 `git merge --no-ff A/master`  
+> 5.push即可  
+
+
+
+********************
+### 【.gitingnore文件】
+- 使用 `#` 注释一行
+- `test.txt`  忽略该文件
+- `*.html`  忽略所有HTML文件
+- `*[o/a]`  忽略所有o和a后缀的文件
+- `!foo.html`  不忽略该文件
+
+`示例文件`
+```conf
+    # maven #
+    target/
+    # IDEA #
+    .idea/
+    *.iml
+    out/
+    # eclipse #
+    bin/
+    .settings/
+    .metadata/
+    .classpath
+    .project
+    Servers/
+```
+********************
+### 终端中显示当前分支
+> 使用 .git-prompt.sh 在Bash下显示当前分支   Windows环境不用看,安装的Git-for-windows软件已经会显示分支名了
+
+- `wget https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh -O ~/.git-prompt.sh` 下载脚本
+- `chmod +x ~/.git-prompt.sh` 赋予可执行权限
+- 在 .bash_alases文件中添加
+```sh
+    lightgreen='\[\033[1;32m\]'
+    lightcyan='\[\033[1;36m\]'
+    lightpurple='\[\033[1;35m\]'
+    yellow='\[\033[1;33m\]'
+    nocolor='\[\033[0m\]'
+    source ~/.git-prompt.sh
+    set_bash_prompt(){
+        #PS1="[e[32m]u[e[m]@[e[33m]W[e[36m]$(__git_ps1 ' (%s)')[e[31m]$[e[m]"
+        PS1="${lightcyan}\t${lightgreen}\w${lightpurple}$(__git_ps1 ' (%s)')${yellow} → \[\e[m\]"
+    }
+    PROMPT_COMMAND="set_bash_prompt; $PROMPT_COMMAND"
+```
+
+********************
+### 命令的自动补全
+> [git自动补全脚本GitHub地址](https://github.com/git/git/tree/master/contrib/completion)
+
+- 下载脚本 `wget https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash -o ~/.git-completion.bash`
+    -  在 .bashrc 或者 .bash_aliases 中添加 source ~/.git-completion.bash
+    - 重启终端或者 `source .bashrc`即可
+- 双击tab可以得到命令建议
+
+***************************************************
+## 搭建Git服务器
 ### 【使用git daemon搭建本地简易Git_Server】
+> daemon可能要安装一下 `sudo apt install git-daemon`
+
 - 先创建一个目录结构
 - Repository
     - Project1
+        - .git
     - Project2
     - Project3
     - 每个Project下都有`.git` 文件夹
@@ -175,15 +266,15 @@
     - `--base-path=''` 指定开放的基本目录（指定开放别的路径）
     - `--port=8096` 指定开放的端口
     - `--verbose` 启动看到的日志信息更多
-    - ` &` 末尾加上表示后台运行，默认是阻塞了当前git bash命令行
+    - `&` 末尾加上表示后台运行，默认是阻塞了当前git bash命令行
 
 - 使用退出程序的操作即可， Ctrl+Shift+C 放在了后台就jobs或者ps 然后kill
 - 在需要克隆的目录下` git clone git://localhost:8096/Project1` 
 
-### 【HTTP访问Git_Server】
+### 【HTTP访问Git服务器】
 - 安装Apache： Web服务器
 - 配置Apache服务器的开放的目录以及Git的路径 
-```
+```xml
 <Location /git>
     AuthType Basic 
     AuthName "GIT Repository" 
@@ -200,8 +291,8 @@
 - `bin\openssl req -new -key server.key -out server.csr -config conf\openssl.cnf` 输入之前密码
 - `bin\openssl x509 -req -days 3650 -in server.csr -signkey server.key -out server.crt` 输入之前密码
 - 把server.key 更名为server.key.old :`bin\openssl rsa -in server.key.old -out server.key`
-- 将 server.key server.crt 移动到conf
-- 修改 httpd.conf 去掉如下三行的注释 #
+- 将server.key server.crt 移动到conf
+- 修改 httpd.conf 去掉如下三行的注释 # 字符
 ```
     LoadModule socache_shmcb_module..
     LoadModule ssl_module..
@@ -211,9 +302,10 @@
 - 或者直接改配置文件，省的每次输这么多 `git config http.sslVerify false`
 
 #### 【使用SSH登录GitServer】
+- TODO 
 
-
-## 【基础命令】 
+*********************
+## 【基础命令解释】 
 - `git touch file1 file2 ` 新建三个文件
 - `echo "  ">>file1 ` 修改文件file1
 - `git rm 文件名 ` ： 删除文件至缓存区
@@ -231,7 +323,7 @@
 - `git reflog `  查看仓库的操作日志
 - `git mv -k oldName  newName` :更改文件名字
 
-```
+```sh
 	usage: git [--version] [--help] [-C <path>] [-c name=value]
            [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
            [-p | --paginate | --no-pager] [--no-replace-objects] [--bare]
@@ -239,7 +331,7 @@
            <command> [<args>]
 ```
 
-****************************************
+**************************
 ## 【reset命令常用方式】
 ### 1.回滚add操作
 ```

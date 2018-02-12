@@ -1,3 +1,23 @@
+`目录 start`
+ 
+- [Scala](#scala)
+    - [安装](#安装)
+    - [基础了解](#基础了解)
+    - [Scala基础语法](#scala基础语法)
+    - [适合Scala使用的场景](#适合scala使用的场景)
+        - [Scala和Java的比较](#scala和java的比较)
+        - [Scala特性](#scala特性)
+            - [类型推断](#类型推断)
+            - [方法](#方法)
+            - [导入](#导入)
+            - [循环控制结构](#循环控制结构)
+            - [函数式编程](#函数式编程)
+        - [Scala对象模型](#scala对象模型)
+        - [数据结构和集合](#数据结构和集合)
+        - [actor](#actor)
+
+`目录 end` *目录创建于2018-01-14*
+****************************************
 # Scala
 
 ## 安装
@@ -16,14 +36,14 @@
 - 如果方法体只是一条语句或表达式， 那就没有必要用大括号括起来
 - Scala不像Java一样有原始类型。数字类型也是对象
 
-*******************************
-```
-object HelloWorld {
-    def main(args:Array[String]){
-        val hello = "Hello World!"
-        println(hello)
+*****************
+```scala
+    object HelloWorld {
+        def main(args:Array[String]){
+            val hello = "Hello World!"
+            println(hello)
+        }
     }
-}
 ```
 `针对这个简单示例的语法特性`
 - 关键字object声明这个类是单例类
@@ -43,13 +63,13 @@ object HelloWorld {
 
 `match表达式`
 - 最简单的match用法跟Java的switch差不多，但是match表达力更强
-```
-var transFer = args(0) match{
-    case "one" => "1"
-    case "Two" => "2"
-    case _ => "Error: '"+args(0)+"' "
-}
-println(transFer)
+```scala
+    var transFer = args(0) match{
+        case "one" => "1"
+        case "Two" => "2"
+        case _ => "Error: '"+args(0)+"' "
+    }
+    println(transFer)
 ```
 - 从语言的纯粹性来看，Scala语法比Java更清晰，也更正规：
     - 默认case 不需要另外一个不同的关键字
@@ -59,12 +79,12 @@ println(transFer)
 - 默认case 就是case _
 - Scala支持间接方法调用，所以可以把args(0).match({...}) 写成 args(0) match({...})
 
-```
-def autoType(obj: Any) = obj match{
-    case s: String => s.length
-    case i: Int  => 4
-    case _:   => -1
-}
+```scala
+    def autoType(obj: Any) = obj match{
+        case s: String => s.length
+        case i: Int  => 4
+        case _:   => -1
+    }
 ```
 - 这个方法以一个未知类型值为参数，然后用模式分别处理String Int类型的值
 
@@ -90,12 +110,12 @@ def autoType(obj: Any) = obj match{
 
 `包`
 - 第一种方法和 Java 一样，在文件的头定义包名，这种方法就后续所有代码都放在该包中。 比如：
-```
+```scala
 package com.runoob
 class HelloWorld
 ```
 - 第二种方法有些类似 C#，如：
-```
+```scala
 package com.runoob {
   class HelloWorld 
 }
@@ -153,7 +173,7 @@ package com.runoob {
     - Java也有类型推断，例如泛型钻石语法，Java的类型推断通常是用在赋值语句等号右边的值上。
     - Scala通常是推断变量而不是值的类型，但是Scala的确也能推断值的类型
 
-```
+```scala
 def len(obj: AnyRef) = {
     obj.toString.length
 }
@@ -173,7 +193,7 @@ def len(obj: AnyRef) = {
 
 > Scala认为所有的东西都是对象，所以可以在任何东西上调用方法，即使是Java里的原始变量
 
-```
+```scala
 def fact(base: Int) : Int = {
     if(base < 0){
         print("负数没有阶乘 ：")
@@ -199,18 +219,18 @@ def fact(base: Int) : Int = {
 #### 循环控制结构
 - for循环
 > Scala采用函数式编程中的概念 列表推导式 来实现for循环
-```
-// 条件for循环
-for (i <- 1 to 10; if i%2 ==0){
-    println(i)
-}
-// 多变量循环
-for(x<- 1 to 16; y<- 1 to x){
-    println(" "*(x-y) + x.toString * y)
-}
-// 一次新建，多次使用
-val xs = for(x <- 2 to 11) yield x
-for(factx <- xs) println(factx)
+```scala
+    // 条件for循环
+    for (i <- 1 to 10; if i%2 ==0){
+        println(i)
+    }
+    // 多变量循环
+    for(x<- 1 to 16; y<- 1 to x){
+        println(" "*(x-y) + x.toString * y)
+    }
+    // 一次新建，多次使用
+    val xs = for(x <- 2 to 11) yield x
+    for(factx <- xs) println(factx)
 ```
 - 列表推导式的一般概念是对一个列表中的元素进行转换，这会产生一个新列表。
     - 例如上的的例子，就是先生成一个xs集合，然后第二个for进行遍历。 创建一次，使用多次
@@ -226,9 +246,18 @@ for(factx <- xs) println(factx)
 ### actor
 
 
+********
+`何时以及如何开始使用Scala`
+- 有信心评估所需的工作量
+- 问题域边界明确，定义清晰
+- 需求说明明确
+- 与其他组件的互操作需求已知
+- 确定了愿意学习新语言的开发人员
 
-
-
-
-
+`可能不适合当前项目的迹象`
+- 受到了业务小组和其他程序支持小组的抵制或缺乏动力
+- 开发团队没有明显的学习Scala的动力
+- 小组中存在分帮结派或政治上存在巨大分歧
+- 小组中高级技术人员的支持力度不够
+- 截止日期太紧张
 

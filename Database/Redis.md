@@ -1,4 +1,47 @@
+`目录 start`
+ 
+- [Redis](#redis)
+    - [【windows上的基本配置】](#windows上的基本配置)
+    - [Linux下的使用](#linux下的使用)
+        - [命令安装](#命令安装)
+        - [解压即用](#解压即用)
+    - [docker安装redis](#docker安装redis)
+    - [redis配置文件](#redis配置文件)
+    - [Redis命令行常规使用](#redis命令行常规使用)
+        - [常用的数据类型操作](#常用的数据类型操作)
+            - [过期策略](#过期策略)
+        - [各数据类型的高级操作](#各数据类型的高级操作)
+            - [字符串 String](#字符串-string)
+            - [列表 list](#列表-list)
+            - [集合 set](#集合-set)
+            - [有序集合 zset](#有序集合-zset)
+            - [散列 hash](#散列-hash)
+            - [HyperLogLog](#hyperloglog)
+            - [GEO【地理位置】](#geo地理位置)
+        - [Pub/Sub发布订阅](#pubsub发布订阅)
+        - [事务](#事务)
+        - [服务器](#服务器)
+        - [Run Configuration](#run-configuration)
+        - [数据安全和性能](#数据安全和性能)
+            - [持久化策略](#持久化策略)
+            - [复制](#复制)
+            - [数据迁移](#数据迁移)
+    - [【Redis的使用】](#redis的使用)
+        - [作为日志记录](#作为日志记录)
+        - [作为网站统计数据](#作为网站统计数据)
+        - [存储配置信息](#存储配置信息)
+        - [自动补全](#自动补全)
+        - [构建锁](#构建锁)
+        - [任务队列](#任务队列)
+        - [【Java使用redis】](#java使用redis)
+        - [jedis遇到的异常](#jedis遇到的异常)
+        - [SpringBoot使用Redis](#springboot使用redis)
+
+`目录 end` *目录创建于2018-02-02* | 更多: [CSDN](http://blog.csdn.net/kcp606) | [oschina](https://my.oschina.net/kcp1104) | [码云](https://gitee.com/kcp1104) 
+****************************************
 # Redis
+> [Redis教程](http://www.runoob.com/redis/redis-tutorial.html)
+
 ## 【windows上的基本配置】
 - 注册为服务
 	- `redis-server --service-install redis.windows.conf --loglevel verbose`
@@ -9,32 +52,40 @@
 	- 客户端登录 `auth redis1104`
 
 ## Linux下的使用
-- 下载源码，make编译， 复制src编译结果 其中的 redis-cli redis-server就可以用了，redis-benchmark可选，测性能
-    - 再复制下面的简化配置文件，或者使用源码中的配置文件自己配置下
+
+### 命令安装
+- 安装 `apt install redis`
+- 开启数据库服务 `redis-server`
+- 打开客户端 `redis-cli`
+
+### 解压即用
+> [下载打包好的](https://github.com/Kuangcp/Configs/tree/master/Database/redis)
+`步骤:`
+- 官网下载源码，执行`make`进行编译，编译完成后，复制src目录中的`redis-cli redis-server`就可以用了，redis-benchmark可选，测性能
+    - 再复制下面的简化配置文件，或者使用源码中根目录下的配置文件自己配置下
+    - [简化配置文件](https://raw.githubusercontent.com/Kuangcp/Configs/master/Database/redis/simple_redis.conf)
 - 再创建以下两个脚本就可以便捷的使用redis了
 `server_redis.sh`
-```
+```sh
     basepath=$(cd `dirname $0`; pwd)
     echo $basepath
-    $basepath/redis-server $basepath/redis.conf
+    $basepath/redis-server $basepath/redis.conf>redis.log &
 ```
 `client_redis.sh`
-```
+```sh
     basepath=$(cd `dirname $0`; pwd)
     $basepath/redis-cli -p 6379
 ```
 
-##【Java使用redis配置】
-[Java使用Redis：详见此处末尾](https://github.com/Kuangcp/Notes/blob/master/TXT/Java/EE.md)
+## docker安装redis
+- [docker-install-redis](/Linux/Container/Docker_Soft.md)
 
 ****************************
 ## redis配置文件
-- [配置文件讲解](https://github.com/Kuangcp/Notes/blob/master/ConfigFiles/Database/redis/explain_redis.conf)
-- [原始配置文件](https://github.com/Kuangcp/Notes/blob/master/ConfigFiles/Database/redis/redis.conf)
-- `[×]使用ing`[简化配置文件](https://github.com/Kuangcp/Notes/blob/master/ConfigFiles/Database/redis/simple_redis.conf) 
+- [配置文件讲解](https://github.com/Kuangcp/Configs/blob/master/Database/redis/explain_redis.conf) | [原始配置文件](https://github.com/Kuangcp/Configs/blob/master/Database/redis/redis.conf)
+- `使用ing`[简化配置文件](https://github.com/Kuangcp/Configs/blob/master/Database/redis/simple_redis.conf) 
 
-
-*********
+********
 ## Redis命令行常规使用
 ### 常用的数据类型操作
 - 【`字符串`】
@@ -67,7 +118,7 @@
     - zadd 将一个给定分值的成员添加到有序集合里 `zadd key 3.3 member` 
     - zrange 根据元素在有序集合中的位置，从有序集合中获取多个元素
         - zrange name 0 -1 withscores 获取所有并获取分值
-        - zrange name 2 30 wi thscores 
+        - zrange name 2 30 withscores 
     - zrevrange 从大到小排序的获取集合元素
     - zrangebyscore 获取有序集合在给定范围中的所有元素
         - zrangebyscore name 0 200 withscores 
@@ -76,7 +127,7 @@
     - zinterstore 进行集合之间的并集（可以看作是多表连接）
     - `精度丢失问题`	
 
-##### 过期策略
+#### 过期策略
 - `expire key seconds` 设置键的过期时间
 - `PTTL/TTL key ` 查看键剩余过期时间（生存时间） ms/s
     -  -1表示永久 -2表示没有该key
@@ -86,7 +137,7 @@
 ### 各数据类型的高级操作
 > [中文文档](http://redisdoc.com/index.html)
 
-##### 字符串 String
+#### 字符串 String
 - 字符串就是字节组成的序列 可以放字节串，整数，浮点数
 - `set key newval nx `存在则set失败
 - `set key newval xx `不存在则set失败
@@ -102,9 +153,10 @@
 - `expire key secondes` 设置或改变超时时间，精度是秒或毫秒
 	- `set key val ex secondes` set时设置超时时间
 - `persist key` 去除超时时间
+- `ttl key` 查看剩余存活时间 -1表示永久 -2表示没有该key
 
 
-##### 列表 list
+#### 列表 list
 - `rpush key val val val `右/尾添加元素 lpush是左/头，若表不存在就新建
 - `rpushx key value` 若表不存在就什么都不做，否则尾插元素
 - `rpop key` 从list右/尾端中删除元素返回元素值 没有了就返回null
@@ -120,7 +172,7 @@
     - 当 pivot 不存在于列表 key 时，不执行任何操作。当 key 不存在时， key 被视为空列表，不执行任何操作。如果 key 不是列表类型，返回一个错误。
 - `LREM key count value` 根据参数 count 的值，移除列表中与参数 value 相等的元素。
 
-##### 集合 set
+#### 集合 set
 - `SADD key member [member ...]`
 - `SCARD key` 返回集合 key 的基数(集合中元素的数量)。
 - `SDIFF key [key ...]`  返回一个集合的全部成员，该集合是所有给定集合之间的差集。不存在的 key 被视为空集。
@@ -137,7 +189,7 @@
 - `SUNIONSTORE destination key [key ...]`
 - `SSCAN key cursor [MATCH pattern] [COUNT count]` 参考 SCAN 命令
 
-##### 有序集合 zset
+#### 有序集合 zset
 
 - ZADD
 - ZCARD
@@ -160,8 +212,7 @@
 - ZLEXCOUNT
 - ZREMRANGEBYLEX
 
-
-##### 散列 hash
+#### 散列 hash
 
 - HDEL
 - HEXISTS
@@ -179,12 +230,12 @@
 - HSCAN
 - HSTRLEN
 
-##### HyperLogLog
+#### HyperLogLog
 PFADD
 PFCOUNT
 PFMERGE
 
-##### GEO（地理位置）
+#### GEO【地理位置】
 GEOADD
 GEOPOS
 GEODIST
@@ -192,7 +243,8 @@ GEORADIUS
 GEORADIUSBYMEMBER
 GEOHASH
 
-### Pub/Sub 发布订阅
+***************
+### Pub/Sub发布订阅
 
 - `PSUBSCRIBE pattern [pattern ...]`
     - 订阅一个或多个符合给定模式的频道。每个模式以 * 作为匹配符，比如 it* 匹配所有以 it 开头的频道( it.news 、 it.blog 、 it.tweets 等等)，
@@ -213,6 +265,7 @@ GEOHASH
     - 指示客户端退订给定的频道。如果没有频道被指定，也即是，一个无参数的 UNSUBSCRIBE 调用被执行，
     - 那么客户端使用 SUBSCRIBE 命令订阅的所有频道都会被退订。在这种情况下，命令会返回一个信息，告知客户端所有被退订的频道。
 
+**************
 ### 事务
 
 - `DISCARD` 取消事务，放弃执行事务块内的所有命令。
@@ -226,6 +279,7 @@ GEOHASH
 - `WATCH key [key ...]`
     - 监视一个(或多个) key ，如果在事务执行之前这个(或这些) key 被其他命令所改动，那么事务将被打断。
 
+*************
 ### 服务器
 
 BGREWRITEAOF
@@ -254,8 +308,7 @@ SLOWLOG
 SYNC
 TIME
 
-
-*****************************************************************
+*****************************
 	
 ### Run Configuration	
 - *slaveof*
@@ -269,8 +322,10 @@ TIME
 #### 持久化策略
 #### 复制
 
-	
-	
+#### 数据迁移
+- 使用主从复制来进行数据
+
+*******
 ## 【Redis的使用】
 ### 作为日志记录
 ### 作为网站统计数据
@@ -284,7 +339,7 @@ TIME
 - 发送邮件
 
 ***************************
-### 【Java 使用 redis 配置】
+### 【Java使用redis】
 - maven依赖(Spring 4.1.7)：
 ```xml
     <dependency>
@@ -292,7 +347,6 @@ TIME
         <artifactId>spring-data-redis</artifactId>
         <version>1.6.0.RELEASE</version>
     </dependency>
-
     <dependency>
         <groupId>redis.clients</groupId>
         <artifactId>jedis</artifactId>
@@ -306,7 +360,7 @@ TIME
         <version>3.3.2</version>
     </dependency>
 ```
-- Spring配置文件 
+`Spring配置文件`
 ```xml
     <!--
         加载redis配置文件 
@@ -317,27 +371,25 @@ TIME
     -->
     <context:property-placeholder location="classpath:redis.properties" ignore-unresolvable="true"/>
     <!-- redis连接池的配置 -->
-      <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
-          <property name="maxActive" value="${redis.pool.maxActive}"/>
-          <property name="maxIdle" value="${redis.pool.maxIdle}"/>
-          <property name="minIdle" value="${redis.pool.minIdle}"/>
-          <property name="maxWait" value="${redis.pool.maxWait}"/>
-          <property name="testOnBorrow" value="${redis.pool.testOnBorrow}"/>
-          <property name="testOnReturn" value="${redis.pool.testOnReturn}"/>
-      </bean>
-      
-      <!-- redis的连接池pool，不是必选项：timeout/password  -->
-      <bean id = "jedisPool" class="redis.clients.jedis.JedisPool">
-          <constructor-arg index="0" ref="jedisPoolConfig"/>
-          <constructor-arg index="1" value="${redis.host}"/>
-          <constructor-arg index="2" value="${redis.port}" type="int"/>
-          <constructor-arg index="3" value="${redis.timeout}" type="int"/>
-          <constructor-arg index="4" value="${redis.password}"/>
-      </bean>
+    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <property name="maxActive" value="${redis.pool.maxActive}"/>
+        <property name="maxIdle" value="${redis.pool.maxIdle}"/>
+        <property name="minIdle" value="${redis.pool.minIdle}"/>
+        <property name="maxWait" value="${redis.pool.maxWait}"/>
+        <property name="testOnBorrow" value="${redis.pool.testOnBorrow}"/>
+        <property name="testOnReturn" value="${redis.pool.testOnReturn}"/>
+    </bean>
+    <!-- redis的连接池pool，不是必选项：timeout/password  -->
+    <bean id = "jedisPool" class="redis.clients.jedis.JedisPool">
+        <constructor-arg index="0" ref="jedisPoolConfig"/>
+        <constructor-arg index="1" value="${redis.host}"/>
+        <constructor-arg index="2" value="${redis.port}" type="int"/>
+        <constructor-arg index="3" value="${redis.timeout}" type="int"/>
+        <constructor-arg index="4" value="${redis.password}"/>
+    </bean>
 ```
 
-- java 实际测试
-- [JedisUtilsTest.java](https://github.com/Kuangcp/Maven_SSM/blob/master/src/test/java/redis/JedisUtilTest.java)
+- java实际测试类[JedisUtilsTest.java](https://github.com/Kuangcp/Maven_SSM/blob/master/src/test/java/redis/JedisUtilTest.java)
 
 - jedis 使用后要disconnect释放连接,最新版本close就不用了，使用连接池就不用
 - jedis 的事务 使用exec释放事务
@@ -348,5 +400,5 @@ TIME
 - 目前是4.1.7 + 1.6.0 + 2.9.0 + 3.3.2 编译通过了	
 
 ### SpringBoot使用Redis
-[SpringBoot配置Redis](https://github.com/Kuangcp/Notes/blob/master/TXT/Java/Spring/SpringBootDatabase.md)	
+[SpringBoot配置Redis](/Java/Spring/SpringBootDatabase.md)	
 	
